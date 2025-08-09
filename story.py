@@ -1,21 +1,34 @@
-import pyttsx3 
+import pyttsx3
 import PyPDF2
 
-# Open the pdf file
-book = open("story.pdf","rb")
-pdf_reader = PyPDF2.PdfReader(book)
-# Initialising the speaker
+# -------- STEP 1: Initialize Text-to-Speech engine --------
 speaker = pyttsx3.init()
 
-for page_num in range(len(pdf_reader.pages)):
-    text  = pdf_reader.pages[page_num].extract_text()
-    speaker.say(text)
-    speaker.runAndWait()
-    speaker.stop()
-    rate = speaker.getProperty("rate")
-    speaker.setProperty("rate",150) # for slower voice
+# -------- STEP 2: List available voices --------
+voices = speaker.getProperty('voices')
+print("\nAvailable Voices: 0, 1")
+for index, voice in enumerate(voices):
+    print(f"{index}: {voice.name} ({voice.languages})")
 
-    voices = speaker.getProperty("voices")
-    speaker.setProperty("voice",voices[1])
+# -------- STEP 3: Let user choose a voice --------
+voice_choice = int(input("\nEnter the voice number you want: "))
+speaker.setProperty('voice', voices[voice_choice].id)
 
-speaker.stop()
+#  Adjust speech rate
+speaker.setProperty('rate', 125)
+
+# -------- STEP 4: Read PDF file --------
+pdf = open('story.pdf', 'rb')  # replace with your file
+pdf_reader = PyPDF2.PdfReader(pdf)
+
+full_text = ""
+for page in pdf_reader.pages:
+    text = page.extract_text()
+    if text:
+        full_text += text + "\n"
+
+pdf.close()
+
+# -------- STEP 5: Speak the text --------
+speaker.say(full_text)
+speaker.runAndWait()
